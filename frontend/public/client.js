@@ -9,17 +9,15 @@ function renderRooms(rooms) {
   }
 
   grid.innerHTML = rooms.map(room => {
-    // Tentukan level class
     let levelClass = `level-${room.alertLevel}`;
     let alertText = 'AMAN';
     if (room.alertLevel === 1) alertText = '⚠️ LEVEL 1 (Waspada)';
     else if (room.alertLevel === 2) alertText = '🔥 LEVEL 2 (Siaga)';
     else if (room.alertLevel === 3) alertText = '🚨 LEVEL 3 (Evakuasi!)';
 
-    // Status sensor
     const flameStatus = room.flame.detected ? 
       `<span class="flame-true">🔥 TERDETEKSI (${room.flame.intensity})</span>` : 
-      `<span>✅ Aman</span>`;
+      `<span>✅ Tidak Terdeteksi</span>`;
     
     const gasStatus = room.gas.detected ?
       `<span class="gas-true">💨 TERDETEKSI (${room.gas.ppm.toFixed(0)} ppm - ${room.gas.gasType})</span>` :
@@ -53,7 +51,6 @@ function renderRooms(rooms) {
   }).join('');
 }
 
-// Tampilkan notifikasi toast
 function showToast(notification) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
@@ -65,13 +62,10 @@ function showToast(notification) {
     ${notification.route ? `<div style="font-size:0.7rem; color:#ffa502;">🚪 Jalur: ${notification.route}</div>` : ''}
   `;
   container.appendChild(toast);
-  
-  // Hapus setelah 6 detik
   setTimeout(() => {
     toast.remove();
   }, 6000);
 
-  // Juga tampilkan notifikasi browser jika diizinkan
   if (Notification.permission === 'granted') {
     new Notification(notification.title, { body: notification.body, icon: '/favicon.ico' });
   }
@@ -92,6 +86,16 @@ socket.on('push-notification', (notification) => {
   showToast(notification);
 });
 
-// Koneksi status
+// [BARU] Kirim event simulasi ke server ketika tombol diklik
+document.getElementById('testNotif1')?.addEventListener('click', () => {
+  socket.emit('test-notification', { level: 1, roomName: 'Ruang Server Lt.2' });
+});
+document.getElementById('testNotif2')?.addEventListener('click', () => {
+  socket.emit('test-notification', { level: 2, roomName: 'Ruang Server Lt.2' });
+});
+document.getElementById('testNotif3')?.addEventListener('click', () => {
+  socket.emit('test-notification', { level: 3, roomName: 'Ruang Server Lt.2' });
+});
+
 socket.on('connect', () => console.log('✅ Terhubung ke server monitoring'));
 socket.on('disconnect', () => console.log('❌ Koneksi server terputus'));

@@ -1,3 +1,4 @@
+// [UBAH] Menambahkan event listener untuk simulasi notifikasi dari client
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
@@ -10,10 +11,8 @@ const io = socketIo(server);
 
 app.use(express.static('public'));
 
-// ---------- Daftar Ruangan (mockup 6 ruangan dengan device_id berbeda) ----------
+// Daftar Ruangan (mockup 6 ruangan)
 const rooms = new Map();
-const deviceToRoom = new Map();
-
 const initialRooms = [
   { deviceId: 'ESP32-FIRESYS-01', name: 'Ruang Server Lt.2', location: 'Lantai 2' },
   { deviceId: 'ESP32-FIRESYS-02', name: 'Ruang Kantor Lt.1', location: 'Lantai 1' },
@@ -34,10 +33,9 @@ initialRooms.forEach(room => {
     alertLevel: 0,
     lastUpdate: new Date().toISOString()
   });
-  deviceToRoom.set(room.deviceId, room.name);
 });
 
-// ---------- Koneksi MQTT ke HiveMQ (TLS) ----------
+// Koneksi MQTT ke HiveMQ (TLS)
 const mqttOptions = {
   host: process.env.MQTT_HOST,
   port: parseInt(process.env.MQTT_PORT),
@@ -47,7 +45,7 @@ const mqttOptions = {
   clientId: `backend-${Date.now()}`,
   clean: false,
   reconnectPeriod: 3000,
-  rejectUnauthorized: true  // untuk valid certificate
+  rejectUnauthorized: true
 };
 
 const mqttClient = mqtt.connect(mqttOptions);
@@ -60,22 +58,15 @@ mqttClient.on('connect', () => {
   });
 });
 
-// ---------- Proses setiap pesan MQTT dan update status ruangan ----------
 mqttClient.on('message', (topic, payload) => {
   try {
     const data = JSON.parse(payload.toString());
     const deviceId = data.device_id;
-    
-    if (!rooms.has(deviceId)) {
-      // Abaikan device_id yang tidak dikenal (bisa ditambahkan nanti)
-      console.warn(`⚠️ Device ID tidak dikenal: ${deviceId}`);
-      return;
-    }
-    
+    if (!rooms.has(deviceId)) return; // abaikan device tidak dikenal
+
     const room = rooms.get(deviceId);
     room.lastUpdate = data.timestamp || new Date().toISOString();
-    
-    // Update sesuai topic
+
     if (topic === 'firedetect/sensor/flame') {
       room.flame = {
         detected: data.flame_detected,
@@ -110,46 +101,64 @@ mqttClient.on('message', (topic, payload) => {
       });
     }
     
-    // Update alert level dari ESP32 jika belum di-update oleh alert event
     if (data.alert_level !== undefined && topic !== 'firedetect/alert/event') {
       room.alertLevel = Math.max(room.alertLevel, data.alert_level);
     }
     
-    // Kirim status ruangan terbaru ke semua client
     broadcastRoomStatus();
   } catch (err) {
     console.error('❌ Gagal parsing payload MQTT:', err.message);
   }
 });
 
-// Fungsi mengirim semua status ruangan ke client
 function broadcastRoomStatus() {
-  const allRooms = Array.from(rooms.values());
-  io.emit('rooms-update', allRooms);
+  io.emit('rooms-update', Array.from(rooms.values()));
 }
 
-// ---------- Socket.IO untuk komunikasi real-time dengan frontend ----------
+// Socket.IO
 io.on('connection', (socket) => {
   console.log('🟢 Client terhubung:', socket.id);
-  
-  // Kirim status awal
   socket.emit('rooms-update', Array.from(rooms.values()));
-  
+
+  // [BARU] Event untuk simulasi notifikasi dari tombol di frontend
+  socket.on('test-notification', (data) => {
+    const level = data.level;
+    const roomName = data.roomName || 'Ruang Server Lt.2';
+    let title, body, route;
+    if (level === 1) {
+      title = '⚠️ ALERT LEVEL 1 - Waspada';
+      body = 'Terdeteksi salah satu sensor (asap/suhu/api). Periksa area.';
+      route = 'Pantau terus kondisi';
+    } else if (level === 2) {
+      title = '🔥 ALERT LEVEL 2 - Siaga';
+      body = 'Dua sensor aktif! Segera tim evakuasi menuju lokasi.';
+      route = 'Bersiap evakuasi sebagian';
+    } else {
+      title = '🚨 ALERT LEVEL 3 - EVAKUASI TOTAL';
+      body = 'Kebakaran besar! Semua karyawan segera meninggalkan gedung.';
+      route = 'Gunakan tangga darurat, jangan lift!';
+    }
+    // Kirim notifikasi ke semua client yang terhubung
+    io.emit('push-notification', {
+      title: `${title} - ${roomName}`,
+      body: body,
+      level: level,
+      room: roomName,
+      route: route,
+      timestamp: new Date().toISOString()
+    });
+    console.log(`🔔 Test notification level ${level} dikirim ke semua client`);
+  });
+
   socket.on('disconnect', () => {
     console.log('🔴 Client terputus:', socket.id);
   });
 });
 
-// ---------- Jalankan HTTP server ----------
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🌐 Website monitoring berjalan di http://localhost:${PORT}`);
 });
 
-// Handle error MQTT
-mqttClient.on('error', (err) => {
-  console.error('❌ MQTT Error:', err.message);
-});
-mqttClient.on('reconnect', () => {
-  console.log('🔄 MQTT reconnect...');
-});
+mqttClient.on('error', (err) => console.error('❌ MQTT Error:', err.message));
+mqttClient.on('reconnect', () => console.log('🔄 MQTT reconnect...'));

@@ -9,15 +9,19 @@
 <body>
   <div class="header">
     <h1>🔥 Fire Detection System</h1>
-    <p>Monitoring real-time | Notifikasi push per level (1-3)</p>
+    <p>Monitoring real-time</p>
+    <!-- [BARU] Tombol simulasi notifikasi tanpa MQTT -->
+    <div style="margin-top: 15px;">
+      <button id="testNotif1" class="test-btn">⚠️ Test Notif Level 1</button>
+      <button id="testNotif2" class="test-btn">🔥 Test Notif Level 2</button>
+      <button id="testNotif3" class="test-btn">🚨 Test Notif Level 3</button>
+    </div>
   </div>
 
   <div class="rooms-grid" id="roomsGrid">
-    <!-- Kartu ruangan akan diisi oleh JavaScript -->
     <div class="loading">Memuat data ruangan...</div>
   </div>
 
-  <!-- Toast notifikasi -->
   <div id="toastContainer" class="toast-container"></div>
 
   <script src="/socket.io/socket.io.js"></script>

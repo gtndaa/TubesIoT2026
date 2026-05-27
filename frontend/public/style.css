@@ -21,6 +21,23 @@ body {
   color: #ff6b6b;
 }
 
+/* [BARU] Gaya untuk tombol uji notifikasi */
+.test-btn {
+  background: #2c3e66;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  margin: 0 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+.test-btn:hover {
+  background: #1e2a3a;
+  transform: scale(1.02);
+}
+
 .rooms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
