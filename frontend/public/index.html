@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire Detection Monitor | Sistem Peringatan Dini Kebakaran</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="header">
+    <h1>🔥 Fire Detection System</h1>
+    <p>Monitoring real-time | Notifikasi push per level (1-3)</p>
+  </div>
+
+  <div class="rooms-grid" id="roomsGrid">
+    <!-- Kartu ruangan akan diisi oleh JavaScript -->
+    <div class="loading">Memuat data ruangan...</div>
+  </div>
+
+  <!-- Toast notifikasi -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/client.js"></script>
+</body>
+</html>
