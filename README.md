@@ -1,4 +1,3 @@
-# TubesIoT
 <div align="center">
 
 ```
@@ -10,7 +9,7 @@
 ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝    ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝ ╚═════╝   ╚═╝
 ```
 
-# 🔥 FireDetect IoT — Smart Fire Detection System
+# 🔥 FireDetect IoT: Smart Fire Detection System
 
 **Sistem deteksi kebakaran berbasis IoT real-time menggunakan ESP32-S2, MQTT, dan Firebase FCM**
 
@@ -27,7 +26,7 @@
 
 ---
 
-## 👥 Tim Pengembang — Kelompok 2
+## 👥 Tim
 
 | NIM | Nama |
 |-----|------|
@@ -36,36 +35,21 @@
 | 13223073 | Fahrian Maulana F. N. |
 | 13223096 | Ramadhan Abhinawa H. |
 
----
 
-## 📋 Daftar Isi
 
-- [Tentang Proyek](#-tentang-proyek)
-- [Arsitektur Sistem](#-arsitektur-sistem)
-- [Hardware](#-hardware--komponen)
-- [Sensor & MQTT Topics](#-sensor--mqtt-topics)
-- [Struktur Payload JSON](#-struktur-payload-json)
-- [Logika Alert Level](#-logika-alert-level)
-- [Konfigurasi MQTT](#-konfigurasi-mqtt)
-- [Implementasi Kode](#-implementasi-kode)
-- [Desain Produk](#-desain-produk)
-- [Cara Penggunaan](#-cara-penggunaan)
-
----
-
-## 🔎 Tentang Proyek
+## 🔎 About
 
 **FireDetect IoT** adalah sistem pendeteksi kebakaran berbasis Internet of Things yang dirancang untuk memantau kondisi ruangan secara real-time. Sistem ini mengintegrasikan tiga sensor fisik (api, gas, suhu) pada mikrokontroler **ESP32-S2**, dikomunikasikan melalui protokol **MQTT over TLS** ke cloud broker **HiveMQ**, dan memproses data di backend **Node.js** sebelum mengirimkan notifikasi push ke perangkat melalui **Firebase Cloud Messaging (FCM)**.
 
 ### ✨ Fitur Utama
 
-- ✅ Monitoring 3 sensor secara **real-time** (setiap 2 detik)
-- ✅ Komunikasi aman via **MQTT over TLS/SSL** (port 8883)
-- ✅ **3 level alert** adaptif berdasarkan kombinasi sensor
-- ✅ **Heartbeat / status online** perangkat otomatis
-- ✅ Notifikasi push ke HP & website via **Firebase FCM**
-- ✅ Pesan **Last Will & Testament** untuk deteksi perangkat offline
-- ✅ **Auto-broadcast** evakuasi pada kondisi darurat (Level 3)
+- Monitoring 3 sensor secara **real-time** (setiap 2 detik)
+- Komunikasi aman via **MQTT over TLS/SSL** (port 8883)
+- **3 level alert** adaptif berdasarkan kombinasi sensor
+- **Heartbeat / status online** perangkat otomatis
+- Notifikasi push ke HP & website via **Firebase FCM**
+- Pesan **Last Will & Testament** untuk deteksi perangkat offline
+- **Auto-broadcast** evakuasi pada kondisi darurat (Level 3)
 
 ---
 
@@ -114,7 +98,7 @@
 
 ---
 
-## 🔧 Hardware & Komponen
+## 🔧 Komponen
 
 | Komponen | Spesifikasi | Fungsi |
 |----------|------------|--------|
@@ -122,17 +106,6 @@
 | **KY-026** | Flame Sensor, GPIO 35 (ADC) | Mendeteksi keberadaan api |
 | **MQ-2** | Gas Sensor, GPIO 14 (ADC) | Mendeteksi gas LPG/Smoke/CO |
 | **DS18B20** | Temperature Sensor, GPIO 33 (1-Wire) | Mengukur suhu ruangan |
-
-### 📦 Dimensi Box Enclosure
-
-```
-┌──────────────────────────────┐
-│  Panjang (W) : 100 mm        │
-│  Lebar   (H) :  70 mm        │
-│  Tinggi  (D) :  40 mm        │
-│  Tebal Dinding: 2.5 mm       │
-└──────────────────────────────┘
-```
 
 ---
 
@@ -319,28 +292,10 @@
 | **Will Message** | `{"status":"OFFLINE","device_id":"ESP32-FIRESYS-01"}` |
 
 
----
-
-## 📐 Desain Produk
-
-### Tampak Depan (Front Panel)
-
-| Komponen | Keterangan |
-|----------|-----------|
-| 4 Lubang Sekrup | Pengunci panel depan agar mudah dibuka untuk maintenance |
-| 1 Lubang Besar | Untuk sensor gas (MQ-2) |
-| 1 Lubang Sedang | Untuk sensor api (KY-026) |
-| 5 Lubang Kecil | LED indikator level bahaya (1–3 + power + status) |
-| 1 Lubang Kecil | Keluaran probe sensor suhu (DS18B20) |
-
----
-
-
----
 
 <div align="center">
 
-**Dibuat dengan ❤️ oleh Kelompok 2 — Tugas Besar IoT**
+**Tugas Besar EL4044 Perancangan Sistem IoT**
 
 *Sistem ini dirancang untuk meningkatkan keselamatan gedung melalui deteksi kebakaran dini yang cepat dan akurat.*
 
