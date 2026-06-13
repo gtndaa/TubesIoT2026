@@ -1,15 +1,15 @@
 #pragma once
 
 // ── WiFi ────────────────────────────────────────────────────
-#define WIFI_SSID     "NAMA_WIFI_KAMU"
-#define WIFI_PASS     "PASSWORD_WIFI_KAMU"
+#define WIFI_SSID     "BOSSCHA SPACE RESTO & TEA_5G"
+#define WIFI_PASS     "BOSSCHASPACE2023"
 
 // ── HiveMQ Cloud ────────────────────────────────────────────
-#define MQTT_HOST     "XXXXX.s1.eu.hivemq.cloud"
+#define MQTT_HOST     "anjaymabar-020068da.a01.euc1.aws.hivemq.cloud"
 #define MQTT_PORT     8883
-#define MQTT_USER     "USERNAME_HIVEMQ"
-#define MQTT_PASS     "PASSWORD_HIVEMQ"
-#define MQTT_CLIENT   "FireSensor_Lt1_R101"
+#define MQTT_USER     "firesys_device"
+#define MQTT_PASS     "Tubesiot2026"
+#define MQTT_CLIENT   "FireSensor_L1_R101"
 
 // ── MQTT Topics ─────────────────────────────────────────────
 #define TOPIC_SENSOR    "gedung/lantai1/ruang101/sensor"
@@ -18,7 +18,6 @@
 // ── Pin ─────────────────────────────────────────────────────
 #define PIN_MQ2_AO      34
 #define PIN_MQ2_DO      35
-#define PIN_KY026_AO    32
 #define PIN_KY026_DO    33
 #define PIN_DS18B20     4
 #define PIN_BUZZER      26
