@@ -58,41 +58,41 @@
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        ESP32-S2 (Edge Device)                   │
-│                                                                  │
-│   ┌──────────┐   ┌──────────┐   ┌──────────────┐               │
-│   │  KY-026  │   │   MQ-2   │   │   DS18B20    │               │
-│   │  (Flame) │   │  (Gas)   │   │   (Suhu)     │               │
-│   └────┬─────┘   └────┬─────┘   └──────┬───────┘               │
-│        │ GPIO 35       │ GPIO 14         │ GPIO 33               │
+│                                                                 │
+│   ┌──────────┐   ┌──────────┐   ┌──────────────┐                │
+│   │  KY-026  │   │   MQ-2   │   │   DS18B20    │                │
+│   │  (Flame) │   │  (Gas)   │   │   (Suhu)     │                │
+│   └────┬─────┘   └────┬─────┘   └──────┬───────┘                │
+│        │ GPIO 35       │ GPIO 14         │ GPIO 33              │
 │        └───────────────┴─────────────────┘                      │
-│                         │ Baca tiap 2 detik                      │
-│                    ┌────▼─────┐                                  │
-│                    │ JSON     │ Struktur data payload             │
-│                    │ Payload  │                                  │
-│                    └────┬─────┘                                  │
+│                         │ Baca tiap 2 detik                     │
+│                    ┌────▼─────┐                                 │
+│                    │ JSON     │ Struktur data payload           │
+│                    │ Payload  │                                 │
+│                    └────┬─────┘                                 │
 └─────────────────────────┼───────────────────────────────────────┘
                            │ WiFi → MQTT over TLS (port 8883)
                            ▼
 ┌──────────────────────────────────┐
-│        HiveMQ Cloud Broker        │
-│  firedetect/sensor/flame          │
-│  firedetect/sensor/gas            │
-│  firedetect/sensor/temperature    │
-│  firedetect/alert/event           │
-│  firedetect/device/status         │
+│        HiveMQ Cloud Broker       │
+│  firedetect/sensor/flame         │
+│  firedetect/sensor/gas           │
+│  firedetect/sensor/temperature   │
+│  firedetect/alert/event          │
+│  firedetect/device/status        │
 └──────────────┬───────────────────┘
                │ Subscribe firedetect/#
                ▼
 ┌──────────────────────────────────┐
-│      Backend Node.js              │
-│  - Proses logika alert level 1-3  │
-│  - Tentukan tindakan              │
+│      Backend Node.js             │
+│  - Proses logika alert level 1-3 │
+│  - Tentukan tindakan             │
 └──────────────┬───────────────────┘
                │ Firebase FCM
                ▼
 ┌──────────────────────────────────┐
-│   📱 Website / HP Pengguna        │
-│   Push Notification Real-time     │
+│   📱 Website / HP Pengguna      │
+│   Push Notification Real-time    │
 └──────────────────────────────────┘
 ```
 
