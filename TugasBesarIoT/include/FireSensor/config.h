@@ -1,15 +1,15 @@
 #pragma once
 
 // ── WiFi ────────────────────────────────────────────────────
-#define WIFI_SSID     "Nawa"
-#define WIFI_PASS     "bhamaganteng"
+#define WIFI_SSID     "ANRESB8"
+#define WIFI_PASS     "bismillah"
 
 // ── HiveMQ Cloud ────────────────────────────────────────────
 #define MQTT_HOST     "anjaymabar-020068da.a01.euc1.aws.hivemq.cloud"
 #define MQTT_PORT     8883
 #define MQTT_USER     "firesys_device"
 #define MQTT_PASS     "Tubesiot2026"
-#define MQTT_CLIENT   "FireSensor_L1_R101"
+#define MQTT_CLIENT   "FireSensor_R101"
 
 // ── MQTT Topics ─────────────────────────────────────────────
 #define TOPIC_SENSOR    "gedung/lantai1/ruang101/sensor"

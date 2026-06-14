@@ -1,6 +1,8 @@
 const socket = io();
 
-// Fungsi render kartu ruangan
+let currentGlobalAlert = { level: 0, sourceRoom: null };
+let lastRoomsData = [];
+
 function renderRooms(rooms) {
   const grid = document.getElementById('roomsGrid');
   if (!rooms.length) {
@@ -9,23 +11,27 @@ function renderRooms(rooms) {
   }
 
   grid.innerHTML = rooms.map(room => {
-    let levelClass = `level-${room.alertLevel}`;
+    const effectiveLevel = Math.max(room.alertLevel, currentGlobalAlert.level);
+    let levelClass = `level-${effectiveLevel}`;
     let alertText = 'AMAN';
-    if (room.alertLevel === 1) alertText = '⚠️ LEVEL 1 (Waspada)';
-    else if (room.alertLevel === 2) alertText = '🔥 LEVEL 2 (Siaga)';
-    else if (room.alertLevel === 3) alertText = '🚨 LEVEL 3 (Evakuasi!)';
+    if (effectiveLevel === 1) alertText = '⚠️ LEVEL 1 (Waspada)';
+    else if (effectiveLevel === 2) alertText = '🔥 LEVEL 2 (Siaga)';
+    else if (effectiveLevel === 3) alertText = '🚨 LEVEL 3 (Evakuasi!)';
 
     const flameStatus = room.flame.detected ? 
       `<span class="flame-true">🔥 TERDETEKSI (${room.flame.intensity})</span>` : 
       `<span>✅ Tidak Terdeteksi</span>`;
-    
     const gasStatus = room.gas.detected ?
       `<span class="gas-true">💨 TERDETEKSI (${room.gas.ppm.toFixed(0)} ppm - ${room.gas.gasType})</span>` :
       `<span>✅ Normal (${room.gas.ppm.toFixed(0)} ppm)</span>`;
-    
     const tempStatus = room.temperature.overThreshold ?
       `<span class="temp-high">🌡️ ${room.temperature.value.toFixed(1)}°C (OVER THRESHOLD!)</span>` :
       `<span>🌡️ ${room.temperature.value.toFixed(1)}°C / ${room.temperature.threshold}°C</span>`;
+
+    let globalNote = '';
+    if (currentGlobalAlert.level > 0 && currentGlobalAlert.sourceRoom !== room.name) {
+      globalNote = `<div style="font-size:0.7rem; color:#ffa502; margin-top:8px;">⚠️ Peringatan dari ${currentGlobalAlert.sourceRoom}</div>`;
+    }
 
     return `
       <div class="room-card ${levelClass}">
@@ -45,6 +51,7 @@ function renderRooms(rooms) {
           <span class="sensor-label">🌡️ SUHU:</span>
           <span class="sensor-value">${tempStatus}</span>
         </div>
+        ${globalNote}
         <div class="location">📍 ${room.location} | Terakhir: ${new Date(room.lastUpdate).toLocaleTimeString()}</div>
       </div>
     `;
@@ -62,23 +69,26 @@ function showToast(notification) {
     ${notification.route ? `<div style="font-size:0.7rem; color:#ffa502;">🚪 Jalur: ${notification.route}</div>` : ''}
   `;
   container.appendChild(toast);
-  setTimeout(() => {
-    toast.remove();
-  }, 6000);
-
+  setTimeout(() => toast.remove(), 6000);
   if (Notification.permission === 'granted') {
     new Notification(notification.title, { body: notification.body, icon: '/favicon.ico' });
   }
 }
 
-// Minta izin notifikasi browser
+// Izin notifikasi
 if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
   Notification.requestPermission();
 }
 
-// Event dari server
+// Event socket
 socket.on('rooms-update', (rooms) => {
+  lastRoomsData = rooms;
   renderRooms(rooms);
+});
+
+socket.on('global-alert-update', (data) => {
+  currentGlobalAlert = { level: data.level, sourceRoom: data.sourceRoom };
+  if (lastRoomsData.length) renderRooms(lastRoomsData);
 });
 
 socket.on('push-notification', (notification) => {
@@ -86,16 +96,16 @@ socket.on('push-notification', (notification) => {
   showToast(notification);
 });
 
-// [BARU] Kirim event simulasi ke server ketika tombol diklik
+// Tombol test dengan ruangan berbeda
 document.getElementById('testNotif1')?.addEventListener('click', () => {
-  socket.emit('test-notification', { level: 1, roomName: 'Ruang Server Lt.2' });
+  socket.emit('test-notification', { level: 1, roomName: 'R102' });
 });
 document.getElementById('testNotif2')?.addEventListener('click', () => {
-  socket.emit('test-notification', { level: 2, roomName: 'Ruang Server Lt.2' });
+  socket.emit('test-notification', { level: 2, roomName: 'R103' });
 });
 document.getElementById('testNotif3')?.addEventListener('click', () => {
-  socket.emit('test-notification', { level: 3, roomName: 'Ruang Server Lt.2' });
+  socket.emit('test-notification', { level: 3, roomName: 'R201' });
 });
 
-socket.on('connect', () => console.log('✅ Terhubung ke server monitoring'));
-socket.on('disconnect', () => console.log('❌ Koneksi server terputus'));
+socket.on('connect', () => console.log('✅ Terhubung ke server'));
+socket.on('disconnect', () => console.log('❌ Koneksi terputus'));
