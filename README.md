@@ -1,302 +1,329 @@
-<div align="center">
+# 🔥 FireDetect IoT
 
-```
-███████╗██╗██████╗ ███████╗    ██████╗ ███████╗████████╗███████╗ ██████╗████████╗
-██╔════╝██║██╔══██╗██╔════╝    ██╔══██╗██╔════╝╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝
-█████╗  ██║██████╔╝█████╗      ██║  ██║█████╗     ██║   █████╗  ██║        ██║
-██╔══╝  ██║██╔══██╗██╔══╝      ██║  ██║██╔══╝     ██║   ██╔══╝  ██║        ██║
-██║     ██║██║  ██║███████╗    ██████╔╝███████╗   ██║   ███████╗╚██████╗   ██║
-╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝    ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝ ╚═════╝   ╚═╝
-```
-
-# 🔥 FireDetect IoT: Smart Fire Detection System
-
-**Sistem deteksi kebakaran berbasis IoT real-time menggunakan ESP32-S2, MQTT, dan Firebase FCM**
+**Sistem Deteksi Kebakaran Berbasis IoT Menggunakan ESP32-S2, MQTT, dan Firebase Cloud Messaging**
 
 ---
 
-[![Platform](https://img.shields.io/badge/Platform-ESP32--S2-red?style=for-the-badge&logo=espressif)](https://www.espressif.com/)
-[![Protocol](https://img.shields.io/badge/Protocol-MQTT%20v3.1.1-blue?style=for-the-badge&logo=mqtt)](https://mqtt.org/)
-[![Broker](https://img.shields.io/badge/Broker-HiveMQ-orange?style=for-the-badge)](https://www.hivemq.com/)
-[![Backend](https://img.shields.io/badge/Backend-Node.js-green?style=for-the-badge&logo=node.js)](https://nodejs.org/)
-[![Notification](https://img.shields.io/badge/Notifikasi-Firebase%20FCM-yellow?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
-[![License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)](LICENSE)
+## 📖 Deskripsi
 
-</div>
+FireDetect IoT merupakan sistem pendeteksi kebakaran berbasis Internet of Things yang dirancang untuk memantau kondisi ruangan secara real-time menggunakan sensor api, sensor gas, dan sensor suhu. Data sensor dikirimkan oleh ESP32-S2 ke broker MQTT melalui koneksi TLS/SSL dan diproses oleh backend Node.js untuk menentukan tindakan lanjutan serta mengirimkan notifikasi kepada pengguna.
+
+Sistem ini dikembangkan sebagai bagian dari **Tugas Besar EL4044 Perancangan Sistem IoT**.
 
 ---
 
 ## 👥 Tim
 
-| NIM | Nama |
-|-----|------|
-| 13223002 | Agita Trinanda I. |
-| 13223034 | Muhammad Dzaki F. |
+| NIM      | Nama                  |
+| -------- | --------------------- |
+| 13223002 | Agita Trinanda I.     |
+| 13223034 | Muhammad Dzaki F.     |
 | 13223073 | Fahrian Maulana F. N. |
-| 13223096 | Ramadhan Abhinawa H. |
+| 13223096 | Ramadhan Abhinawa H.  |
 
+---
 
+## ✨ Fitur Utama
 
-## 🔎 About
-
-**FireDetect IoT** adalah sistem pendeteksi kebakaran berbasis Internet of Things yang dirancang untuk memantau kondisi ruangan secara real-time. Sistem ini mengintegrasikan tiga sensor fisik (api, gas, suhu) pada mikrokontroler **ESP32-S2**, dikomunikasikan melalui protokol **MQTT over TLS** ke cloud broker **HiveMQ**, dan memproses data di backend **Node.js** sebelum mengirimkan notifikasi push ke perangkat melalui **Firebase Cloud Messaging (FCM)**.
-
-### ✨ Fitur Utama
-
-- Monitoring 3 sensor secara **real-time** (setiap 2 detik)
-- Komunikasi aman via **MQTT over TLS/SSL** (port 8883)
-- **3 level alert** adaptif berdasarkan kombinasi sensor
-- **Heartbeat / status online** perangkat otomatis
-- Notifikasi push ke HP & website via **Firebase FCM**
-- Pesan **Last Will & Testament** untuk deteksi perangkat offline
-- **Auto-broadcast** evakuasi pada kondisi darurat (Level 3)
+* Monitoring kondisi ruangan secara real-time
+* Deteksi api menggunakan sensor KY-026
+* Deteksi gas/asap menggunakan sensor MQ-2
+* Monitoring suhu menggunakan sensor DS18B20
+* Komunikasi MQTT melalui TLS/SSL (port 8883)
+* Sistem klasifikasi tingkat bahaya (Level 0–3)
+* Aktuator lokal berupa buzzer dan LED indikator
+* Kendali perangkat jarak jauh melalui MQTT
+* Integrasi backend Node.js dan Firebase Cloud Messaging (FCM)
 
 ---
 
 ## 🏗 Arsitektur Sistem
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        ESP32-S2 (Edge Device)                   │
-│                                                                 │
-│   ┌──────────┐   ┌──────────┐   ┌──────────────┐                │
-│   │  KY-026  │   │   MQ-2   │   │   DS18B20    │                │
-│   │  (Flame) │   │  (Gas)   │   │   (Suhu)     │                │
-│   └────┬─────┘   └────┬─────┘   └──────┬───────┘                │
-│        │ GPIO 35       │ GPIO 14         │ GPIO 33              │
-│        └───────────────┴─────────────────┘                      │
-│                         │ Baca tiap 2 detik                     │
-│                    ┌────▼─────┐                                 │
-│                    │ JSON     │ Struktur data payload           │
-│                    │ Payload  │                                 │
-│                    └────┬─────┘                                 │
-└─────────────────────────┼───────────────────────────────────────┘
-                           │ WiFi → MQTT over TLS (port 8883)
-                           ▼
+```text
 ┌──────────────────────────────────┐
-│        HiveMQ Cloud Broker       │
-│  firedetect/sensor/flame         │
-│  firedetect/sensor/gas           │
-│  firedetect/sensor/temperature   │
-│  firedetect/alert/event          │
-│  firedetect/device/status        │
-└──────────────┬───────────────────┘
-               │ Subscribe firedetect/#
-               ▼
+│            ESP32-S2              │
+│                                  │
+│  KY-026   MQ-2    DS18B20        │
+│    │        │         │          │
+│    └────────┴─────────┘          │
+│       Logika Deteksi Bahaya      │
+└───────────────┬──────────────────┘
+                │ MQTT over TLS
+                ▼
 ┌──────────────────────────────────┐
-│      Backend Node.js             │
-│  - Proses logika alert level 1-3 │
-│  - Tentukan tindakan             │
-└──────────────┬───────────────────┘
-               │ Firebase FCM
-               ▼
+│          HiveMQ Cloud            │
+│                                  │
+│ gedung/lantai1/ruang101/sensor   │
+│ gedung/lantai1/ruang101/aktuator │
+└───────────────┬──────────────────┘
+                │
+                ▼
 ┌──────────────────────────────────┐
-│   📱 Website / HP Pengguna      │
-│   Push Notification Real-time    │
+│         Backend Node.js          │
+│                                  │
+│ - Monitoring                     │
+│ - Logging                        │
+│ - Notifikasi FCM                 │
+└───────────────┬──────────────────┘
+                │
+                ▼
+┌──────────────────────────────────┐
+│      Website / Mobile User       │
 └──────────────────────────────────┘
 ```
 
 ---
 
-## 🔧 Komponen
+## 🔧 Komponen Hardware
 
-| Komponen | Spesifikasi | Fungsi |
-|----------|------------|--------|
-| **ESP32-S2** | Mikrokontroler utama | Membaca sensor, koneksi WiFi/MQTT |
-| **KY-026** | Flame Sensor, GPIO 35 (ADC) | Mendeteksi keberadaan api |
-| **MQ-2** | Gas Sensor, GPIO 14 (ADC) | Mendeteksi gas LPG/Smoke/CO |
-| **DS18B20** | Temperature Sensor, GPIO 33 (1-Wire) | Mengukur suhu ruangan |
-
----
-
-## 📡 Sensor & MQTT Topics
-
-| Sensor | Model | GPIO | MQTT Topic | QoS | Retain |
-|--------|-------|------|-----------|-----|--------|
-| Flame Sensor | KY-026 | 35 (ADC) | `firedetect/sensor/flame` | 1 | ✅ |
-| Gas Sensor | MQ-2 | 14 (ADC) | `firedetect/sensor/gas` | 1 | ✅ |
-| Temperature | DS18B20 | 33 (1-Wire) | `firedetect/sensor/temperature` | 1 | ✅ |
-| Alert Event | ESP32 Logic | Software | `firedetect/alert/event` | 2 | ❌ |
-| Device Status | ESP32 WiFi | Software | `firedetect/device/status` | 1 | ✅ |
+| Komponen            | Fungsi                   |
+| ------------------- | ------------------------ |
+| ESP32-S2            | Mikrokontroler utama     |
+| KY-026 Flame Sensor | Deteksi keberadaan api   |
+| MQ-2 Gas Sensor     | Deteksi gas dan asap     |
+| DS18B20             | Pengukuran suhu          |
+| Buzzer              | Alarm lokal              |
+| LED Hijau           | Indikator kondisi normal |
+| LED Merah           | Indikator kondisi bahaya |
 
 ---
 
-## 📦 Struktur Payload JSON
+## 🔌 Konfigurasi Pin
 
-### 🔥 Flame Sensor — `firedetect/sensor/flame`
+| Perangkat             | GPIO    |
+| --------------------- | ------- |
+| MQ-2 Analog Output    | GPIO 34 |
+| MQ-2 Digital Output   | GPIO 35 |
+| KY-026 Digital Output | GPIO 33 |
+| DS18B20               | GPIO 4  |
+| Buzzer                | GPIO 26 |
+| LED Merah             | GPIO 27 |
+| LED Hijau             | GPIO 14 |
+
+---
+
+## 📡 MQTT Topics
+
+### Publish
+
+```text
+gedung/lantai1/ruang101/sensor
+```
+
+Digunakan untuk mengirim data sensor dan status bahaya dari ESP32 ke server.
+
+### Subscribe
+
+```text
+gedung/lantai1/ruang101/aktuator
+```
+
+Digunakan untuk menerima perintah dari backend ke perangkat.
+
+---
+
+## 📦 Payload Sensor
+
+ESP32 mengirimkan data setiap 5 detik.
+
+Contoh payload:
 
 ```json
 {
-  "device_id": "ESP32-FIRESYS-01",
-  "sensor": "flame",
-  "model": "KY-026",
-  "timestamp": "2025-05-14T09:23:11.452Z",
-  "gpio_pin": 35,
-  "digital_value": 0,
-  "analog_value": 312,
-  "flame_detected": true,
-  "intensity": "HIGH",
-  "alert_level": 2,
-  "location": "Ruang Server Lt.2"
+  "lantai": 1,
+  "ruang": "R101",
+  "level": 2,
+  "gas": 2841,
+  "api": true,
+  "suhu": 68.5,
+  "status": "BAHAYA"
 }
 ```
 
-| Field | Tipe | Keterangan |
-|-------|------|-----------|
-| `digital_value` | Integer (0/1) | 0 = api terdeteksi, 1 = aman (aktif LOW) |
-| `analog_value` | Integer (0–4095) | Nilai ADC 12-bit, makin kecil = makin terang |
-| `flame_detected` | Boolean | `true` jika `digital_value == 0` |
-| `intensity` | String | `LOW` / `MEDIUM` / `HIGH` |
-| `alert_level` | Integer (1–3) | Level bahaya yang ditentukan ESP32 |
+### Penjelasan Field
+
+| Field  | Tipe    | Keterangan              |
+| ------ | ------- | ----------------------- |
+| lantai | Integer | Nomor lantai            |
+| ruang  | String  | Identitas ruangan       |
+| level  | Integer | Tingkat bahaya          |
+| gas    | Integer | Nilai ADC MQ-2 (0–4095) |
+| api    | Boolean | Status deteksi api      |
+| suhu   | Float   | Suhu dalam °C           |
+| status | String  | Status kondisi ruangan  |
 
 ---
 
-### 💨 Gas Sensor — `firedetect/sensor/gas`
+## 🚨 Klasifikasi Tingkat Bahaya
+
+### Level 0 — AMAN
+
+Tidak ada sensor yang mendeteksi kondisi berbahaya.
 
 ```json
 {
-  "device_id": "ESP32-FIRESYS-01",
-  "sensor": "gas",
-  "model": "MQ-2",
-  "timestamp": "2025-05-14T09:23:09.118Z",
-  "gpio_pin": 14,
-  "analog_value": 2841,
-  "voltage_v": 2.30,
-  "ppm": 487.3,
-  "threshold_ppm": 300,
-  "gas_detected": true,
-  "gas_type": "LPG/Smoke",
-  "alert_level": 2,
-  "location": "Ruang Server Lt.2"
-}
-```
-
-| Field | Tipe | Keterangan |
-|-------|------|-----------|
-| `ppm` | Float | Konsentrasi gas hasil kalibrasi |
-| `threshold_ppm` | Integer | Batas aman (default: 300 PPM) |
-| `gas_detected` | Boolean | `true` jika `ppm > threshold_ppm` |
-| `gas_type` | String | `LPG` / `Smoke` / `CO` |
-
----
-
-### 🌡️ Temperature Sensor — `firedetect/sensor/temperature`
-
-```json
-{
-  "device_id": "ESP32-FIRESYS-01",
-  "sensor": "temperature",
-  "model": "DS18B20",
-  "timestamp": "2025-05-14T09:23:08.776Z",
-  "gpio_pin": 33,
-  "temperature_c": 68.5,
-  "threshold_c": 60.0,
-  "over_threshold": true,
-  "resolution_bits": 12,
-  "alert_level": 1,
-  "location": "Ruang Server Lt.2"
+  "level": 0,
+  "status": "AMAN"
 }
 ```
 
 ---
 
-### 🚨 Alert Event — `firedetect/alert/event`
+### Level 1 — WASPADA
+
+Salah satu kondisi berikut terdeteksi:
+
+* Gas tinggi
+* Api terdeteksi
+* Suhu melebihi ambang batas
 
 ```json
 {
-  "device_id": "ESP32-FIRESYS-01",
-  "alert_id": "ALT-20250514-0923-L3",
-  "timestamp": "2025-05-14T09:23:15.000Z",
-  "alert_level": 3,
-  "alert_label": "KEBAKARAN BESAR - EVAKUASI SEGERA",
-  "sensors_triggered": ["flame", "gas", "temperature"],
-  "readings": {
-    "flame_detected": true,
-    "gas_ppm": 487.3,
-    "temperature_c": 68.5
-  },
-  "location": "Ruang Server Lt.2",
-  "action": "BROADCAST_ALL",
-  "evacuation_route": "Tangga Darurat A - Lantai 2",
-  "auto_broadcast": true
+  "level": 1,
+  "status": "WASPADA"
 }
 ```
 
 ---
 
-### 💚 Heartbeat (Semua Sensor Normal) — `firedetect/device/status`
+### Level 2 — BAHAYA
+
+Gas tinggi dan api terdeteksi secara bersamaan.
 
 ```json
 {
-  "device_id": "ESP32-FIRESYS-01",
-  "sensor": "all",
-  "timestamp": "2025-05-14T08:00:00.000Z",
-  "status": "NORMAL",
-  "alert_level": 0,
-  "readings": {
-    "flame_detected": false,
-    "gas_ppm": 42.1,
-    "temperature_c": 27.3
-  },
-  "uptime_seconds": 86400,
-  "wifi_rssi_dbm": -58,
-  "location": "Ruang Server Lt.2"
+  "level": 2,
+  "status": "BAHAYA"
 }
 ```
 
 ---
 
-## 🚦 Logika Alert Level
+### Level 3 — DARURAT
 
-```
-  ┌─────────────────────────────────────────────────────────────────┐
-  │                      ALERT LEVEL MATRIX                         │
-  ├──────────┬──────────────────────────────┬───────────────────────┤
-  │  LEVEL   │  KONDISI SENSOR              │  AKSI SISTEM          │
-  ├──────────┼──────────────────────────────┼───────────────────────┤
-  │  🟡  1   │  1 sensor aktif              │  Tunggu konfirmasi    │
-  │          │  Suhu ATAU Gas ATAU Api      │  admin 60 detik       │
-  ├──────────┼──────────────────────────────┼───────────────────────┤
-  │  🟠  2   │  2 sensor aktif              │  Alarm berbunyi,      │
-  │          │  Suhu+Gas ATAU Suhu+Api      │  broadcast tim        │
-  │          │                              │  evakuasi lantai      │
-  ├──────────┼──────────────────────────────┼───────────────────────┤
-  │  🔴  3   │  3 sensor aktif              │  AUTO BROADCAST       │
-  │          │  + Api besar terdeteksi      │  tanpa konfirmasi,    │
-  │          │                              │  tampilkan jalur      │
-  │          │                              │  evakuasi             │
-  └──────────┴──────────────────────────────┴───────────────────────┘
-```
+Gas tinggi, api terdeteksi, dan suhu tinggi secara bersamaan.
 
-| Level | Notifikasi Dikirim ke |
-|-------|-----------------------|
-| 🟡 Level 1 | Admin & Security |
-| 🟠 Level 2 | Semua staf lantai terdampak |
-| 🔴 Level 3 | **Seluruh karyawan** via FCM Broadcast |
+```json
+{
+  "level": 3,
+  "status": "DARURAT"
+}
+```
 
 ---
 
-## ⚙️ Konfigurasi MQTT
+## ⚙️ Threshold Sensor
 
-| Parameter | Nilai |
-|-----------|-------|
-| **Broker Host** | `*.hivemq.cloud` |
-| **Port MQTT (TLS)** | `8883` |
-| **Protocol** | MQTT v3.1.1 over TLS/SSL |
-| **Client ID** | `ESP32-FIRESYS-01` |
-| **Username** | `firesys_device` |
-| **Keep Alive** | 60 detik |
-| **QoS Level** | 1 (At Least Once) |
-| **Clean Session** | `false` (persistent) |
-| **Will Topic** | `firedetect/device/status` |
-| **Will Message** | `{"status":"OFFLINE","device_id":"ESP32-FIRESYS-01"}` |
+Nilai ambang yang digunakan pada firmware:
 
+```cpp
+#define MQ2_THRESHOLD   2000
+#define SUHU_THRESHOLD  50.0f
+```
 
+### MQ-2
 
-<div align="center">
+Kondisi gas dianggap tinggi jika:
 
-**Tugas Besar EL4044 Perancangan Sistem IoT**
+```cpp
+mq2_ao > 2000
+```
 
-*Sistem ini dirancang untuk meningkatkan keselamatan gedung melalui deteksi kebakaran dini yang cepat dan akurat.*
+atau output digital MQ-2 aktif.
 
-</div>
+### DS18B20
+
+Kondisi suhu dianggap tinggi jika:
+
+```cpp
+suhu > 50°C
+```
+
+---
+
+## 🔊 Aktuator Lokal
+
+### LED Hijau
+
+Menunjukkan kondisi normal.
+
+### LED Merah
+
+Menyala saat Level 1–3.
+
+### Buzzer
+
+| Level | Pola                      |
+| ----- | ------------------------- |
+| 0     | Mati                      |
+| 1     | Berkedip lambat (1 detik) |
+| 2     | Berkedip cepat (300 ms)   |
+| 3     | Menyala terus             |
+
+---
+
+## 🎛 MQTT Control Command
+
+Backend dapat mengirim perintah ke:
+
+```text
+gedung/lantai1/ruang101/aktuator
+```
+
+### Mengaktifkan Override Buzzer
+
+```json
+{
+  "buzzer": 1
+}
+```
+
+### Menonaktifkan Override Buzzer
+
+```json
+{
+  "buzzer": 0
+}
+```
+
+### Reset Sistem
+
+```json
+{
+  "reset": 1
+}
+```
+
+---
+
+## 🔐 Konfigurasi MQTT
+
+| Parameter  | Nilai        |
+| ---------- | ------------ |
+| Protocol   | MQTT v3.1.1  |
+| Security   | TLS/SSL      |
+| Port       | 8883         |
+| Keep Alive | 60 detik     |
+| Broker     | HiveMQ Cloud |
+
+---
+
+## 🚀 Alur Kerja Sistem
+
+1. ESP32 membaca sensor MQ-2, KY-026, dan DS18B20.
+2. Sistem menentukan level bahaya berdasarkan kondisi sensor.
+3. Aktuator lokal (LED dan buzzer) diperbarui sesuai level.
+4. Data sensor dikirim ke broker MQTT setiap 5 detik.
+5. Backend menerima dan memproses data.
+6. Backend mengirimkan notifikasi ke pengguna menggunakan Firebase Cloud Messaging.
+7. Backend dapat mengirim perintah kembali ke perangkat melalui topic aktuator.
+
+---
+
+## 📚 Mata Kuliah
+
+**EL4044 – Perancangan Sistem IoT**
+
+Institut Teknologi Bandung
+
+Semester II 2025/2026
