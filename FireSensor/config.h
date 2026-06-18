@@ -1,8 +1,8 @@
 #pragma once
 
 // ── WiFi ────────────────────────────────────────────────────
-#define WIFI_SSID     "ANRESB8"
-#define WIFI_PASS     "bismillah"
+#define WIFI_SSID     "Zryyy Phone"
+#define WIFI_PASS     "bismillahfahriipk3.5"
 
 // ── HiveMQ Cloud ────────────────────────────────────────────
 #define MQTT_HOST     "anjaymabar-020068da.a01.euc1.aws.hivemq.cloud"

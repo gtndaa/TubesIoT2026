@@ -201,7 +201,7 @@ void loop() {
 
     // ── Logika level bahaya ─────────────────────────────────
     bool gas_tinggi  = (mq2_ao > MQ2_THRESHOLD) || mq2_do;
-    bool api_aktif   = ky_do;
+    bool api_aktif   = (ky_do);
     bool suhu_tinggi = (suhu > SUHU_THRESHOLD);
 
     if      (gas_tinggi && api_aktif && suhu_tinggi) level = 3;
@@ -216,7 +216,7 @@ void loop() {
 
     // ── Serial debug ─────────────────────────────────────────
     Serial.printf("MQ2_AO: %d | MQ2_DO: %d | KY026: %d | Suhu: %.1f°C | Level: %d | Override: %d\n",
-        mq2_ao, mq2_do, ky_do, suhu, level, buzzer_override);
+        mq2_ao, mq2_do, api_aktif, suhu, level, buzzer_override);
 
     // ── Kirim data sensor ke server MQTT tiap 5 detik ────────
     if (millis() - lastKirim >= INTERVAL_KIRIM) {
